@@ -6,7 +6,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Conexión a la base de datos usando variables de entorno y nombre del servicio
+
 const pool = new Pool({
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
@@ -15,7 +15,6 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
 });
 
-// GET /api/marcaciones (Con filtros opcionales)
 app.get('/api/marcaciones', async (req, res) => {
   try {
     const { empleado, fecha } = req.query;
@@ -37,7 +36,7 @@ app.get('/api/marcaciones', async (req, res) => {
   }
 });
 
-// GET /api/marcaciones/{id}
+
 app.get('/api/marcaciones/:id', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM marcaciones WHERE id = $1', [req.params.id]);
@@ -48,11 +47,11 @@ app.get('/api/marcaciones/:id', async (req, res) => {
   }
 });
 
-// POST /api/marcaciones (CRUD y Lógica de validación)
+
 app.post('/api/marcaciones', async (req, res) => {
   const { codigo_empleado, nombre_empleado, fecha, hora_ingreso_programada, hora_ingreso_real, hora_salida_programada, hora_salida_real, observacion } = req.body;
 
-  // Validaciones obligatorias
+
   if (!codigo_empleado || !fecha) {
     return res.status(400).json({ error: 'Código de empleado y fecha son obligatorios' });
   }
@@ -60,7 +59,7 @@ app.post('/api/marcaciones', async (req, res) => {
     return res.status(400).json({ error: 'La hora de salida no puede ser anterior a la de ingreso' });
   }
 
-  // Determinación automática del estado en el backend
+
   let estado = 'OTRO';
   if (hora_ingreso_real) {
     estado = (hora_ingreso_real <= hora_ingreso_programada) ? 'PUNTUAL' : 'ATRASO';
@@ -80,7 +79,7 @@ app.post('/api/marcaciones', async (req, res) => {
   }
 });
 
-// DELETE /api/marcaciones/{id}
+
 app.delete('/api/marcaciones/:id', async (req, res) => {
   try {
     await pool.query('DELETE FROM marcaciones WHERE id = $1', [req.params.id]);
